@@ -1,0 +1,126 @@
+<section class="index-section section_product-list container">
+
+    {{ 'section-product-list.css' | asset_url | stylesheet_tag }}
+    {{ 'element-product-item.css' | asset_url | stylesheet_tag }}
+
+    {%- liquid
+        assign collection = collections[ section.settings.collection ]
+        assign quantity = section.settings.quantity 
+        assign section_title = section.settings.title 
+        assign section_info_text = section.settings.info
+        assign button_text = section.settings.button_text 
+    -%}
+    
+    <h2 class="section-header h1">
+        {{ section_title }}
+    </h2>
+
+    <p class="section-info">
+        {{ section_info_text }}
+    </p>
+
+    <div class="section_product-list_carousel product-carousel" data-section="{{ section.id }}">
+        <div class="swiper-wrapper">
+            {%- for product in collection.products limit: quantity -%}
+                <div class="product-carousel_item swiper-slide">
+                    <a href="{{ product.url }}" class="product-carousel_link">
+                        <div class="product-carousel_item_image-wrapper">
+                            <img 
+                                class="product-image" 
+                                src="{{ product.featured_image | img_url: '310x310' }}" 
+                                alt="{{ product.featured_image.alt }}"
+                                width="310"
+                                height="310">
+
+                            {%- for product_tag in product.tags -%}
+                                {%- if product_tag contains 'day:' -%}
+                                    {% assign per_day_tag = product_tag | replace: 'day:', '$' %}
+
+                                    <div class="product-image_per-day-mark">
+                                        <p>{{ per_day_tag }}</p>
+                                        <span>/day</span>
+                                    </div>
+                                {%- endif -%}
+                            {%- endfor -%}
+                           
+                            <div class="product-image_marks">
+                                {%- for product_tag in product.tags -%}
+                                    {%- if product_tag contains 'mark:' -%}
+                                        {% assign clear_tag = product_tag | replace: 'mark:', '' %}
+    
+                                        <p class="product-image_mark product-image_mark_{{ clear_tag }}"><span>{{ clear_tag }}</span></p>
+                                    {%- endif -%}
+                                {%- endfor -%}
+                            </div>
+                        </div>
+
+                        <h6 class="product-title">
+                            {{ product.title }}
+                        </h6>
+        
+                        <div class="product-price">
+                            {{ product.price | money }}
+                        </div>
+                    </a>
+                </div>
+            {%- endfor -%}
+        </div>
+        
+        <div class="swiper-pagination swiper-pagination_{{ section.id }}"></div>
+
+    </div>
+
+    <a class="section_product-list_btn btn" href="{{ collection.url }}">
+        {{ button_text }}
+    </a>
+
+</section>
+
+<script src="{{ 'product-list-carousel.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Product list",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+        {
+            "type": "richtext",
+            "id": "title",
+            "label": "Title"
+        },
+        {
+            "type": "textarea",
+            "id": "info",
+            "label": "Info text"
+        },
+        {
+            "type": "collection",
+            "id": "collection",
+            "label": "Collection"
+        },
+        {
+            "type": "range",
+            "id": "quantity",
+            "min": 4,
+            "max": 10,
+            "step": 1,
+            "label": "Product limit (4-10)",
+            "default": 4
+        },
+        {
+            "type": "text",
+            "id": "button_text",
+            "label": "Button text",
+            "default": "See All Products"
+        }
+    ],
+    "presets": [
+        {
+            "name": "Product list",
+            "blocks": []
+        }
+    ]
+}
+{% endschema %}
+
